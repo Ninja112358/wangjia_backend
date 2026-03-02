@@ -1,0 +1,50 @@
+server:
+  port: 8110
+  servlet:
+    context-path: /api
+spring:
+  jackson:
+    time-zone: GMT+8
+  servlet:
+    multipart:
+      max-file-size: 20MB # 单个文件上传的最大大小
+      max-request-size: 40MB # 请求中所有文件的总大小
+  application:
+    name: wangjia_backend
+  # 数据库配置
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/wangjia_hotel?useUnicode=true&characterEncoding=utf-8&serverTimezone=Asia/Shanghai
+    username: root
+    password: 112358
+  # redis配置
+  redis:
+    port: 6379
+    host: localhost
+    database: 1
+  # session失效时间
+  session:
+    timeout: 86400
+    store-type: redis
+mybatis-plus:
+  configuration:
+    map-underscore-to-camel-case: false
+    # 仅在开发环境开启日志
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+  global-config:
+    db-config:
+      logic-delete-field: isDelete # 全局逻辑删除的实体字段名
+      logic-delete-value: 1 # 逻辑已删除值（默认为 1）
+      logic-not-delete-value: 0 # 逻辑未删除值（默认为 0）
+# 接口文档配置：http://localhost:8110/api/doc.html
+knife4j:
+  enable: true
+  openapi:
+    title: 接口文档
+    version: 1.0
+    group:
+      default:
+        group-name: default
+        api-rule: package
+        api-rule-resources:
+          - com.ninja.wangjia_backend.controller
