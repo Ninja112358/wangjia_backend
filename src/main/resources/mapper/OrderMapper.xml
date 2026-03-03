@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ninja.wangjia_backend.mapper.OrderMapper">
+
+    <resultMap id="BaseResultMap" type="com.ninja.wangjia_backend.model.entity.Order">
+            <id property="id" column="id" />
+            <result property="name" column="name" />
+            <result property="phone" column="phone" />
+            <result property="IDCard" column="IDCard" />
+            <result property="cardType" column="cardType" />
+            <result property="pay" column="pay" />
+            <result property="restMoney" column="restMoney" />
+            <result property="consume" column="consume" />
+            <result property="roomId" column="roomId" />
+            <result property="roomType" column="roomType" />
+            <result property="roomPrice" column="roomPrice" />
+            <result property="orderGroupId" column="orderGroupId" />
+            <result property="customType" column="customType" />
+            <result property="orderInfo" column="orderInfo" />
+            <result property="orderState" column="orderState" />
+            <result property="endTime" column="endTime" />
+            <result property="createTime" column="createTime" />
+            <result property="updateTime" column="updateTime" />
+            <result property="isDelete" column="isDelete" />
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id,name,phone,IDCard,cardType,pay,
+        restMoney,consume,roomId,roomType,roomPrice,
+        orderGroupId,customType,orderInfo,orderState,endTime,
+        createTime,updateTime,isDelete
+    </sql>
+</mapper>

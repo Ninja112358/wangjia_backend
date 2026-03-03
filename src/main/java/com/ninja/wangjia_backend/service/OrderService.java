@@ -1,0 +1,15 @@
+package com.ninja.wangjia_backend.service;
+
+import com.ninja.wangjia_backend.model.dto.order.OrderCheckInRequest;
+import com.ninja.wangjia_backend.model.entity.Order;
+import com.baomidou.mybatisplus.extension.service.IService;
+
+/**
+* @author Administrator
+* @description 针对表【order(订单信息)】的数据库操作Service
+* @createDate 2026-03-03 23:40:28
+*/
+public interface OrderService extends IService<Order> {
+
+    Boolean checkIn(OrderCheckInRequest orderCheckInRequest);
+}

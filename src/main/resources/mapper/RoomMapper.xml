@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ninja.wangjia_backend.mapper.RoomMapper">
+
+    <resultMap id="BaseResultMap" type="com.ninja.wangjia_backend.model.entity.Room">
+            <id property="id" column="id" />
+            <result property="roomId" column="roomId" />
+            <result property="roomType" column="roomType" />
+            <result property="roomPrice" column="roomPrice" />
+            <result property="roomState" column="roomState" />
+            <result property="orderId" column="orderId" />
+            <result property="roomFloor" column="roomFloor" />
+            <result property="roomCustom" column="roomCustom" />
+            <result property="roomPeopleNum" column="roomPeopleNum" />
+            <result property="roomInfo" column="roomInfo" />
+            <result property="isWindow" column="isWindow" />
+            <result property="isTeam" column="isTeam" />
+            <result property="isContact" column="isContact" />
+            <result property="createTime" column="createTime" />
+            <result property="updateTime" column="updateTime" />
+            <result property="isDelete" column="isDelete" />
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id,roomId,roomType,roomPrice,roomState,orderId,
+        roomFloor,roomCustom,roomPeopleNum,roomInfo,isWindow,
+        isTeam,isContact,createTime,updateTime,isDelete
+    </sql>
+</mapper>

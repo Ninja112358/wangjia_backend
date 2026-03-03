@@ -1,14 +1,12 @@
-package com.ninja.wangjia_backend.model.dto.room_type;
+package com.ninja.wangjia_backend.model.dto.room;
 
 import com.ninja.wangjia_backend.common.PageRequest;
 import lombok.Data;
-import lombok.ToString;
 
 import java.io.Serializable;
 
 @Data
-@ToString
-public class RoomTypeQueryRequest extends PageRequest implements Serializable {
+public class RoomQueryRequest extends PageRequest implements Serializable {
     private Long id;
     private static final long serialVersionUID = 1L;
 }
