@@ -13,4 +13,5 @@ import com.ninja.wangjia_backend.model.entity.Room;
 public interface RoomService extends IService<Room> {
 
     Wrapper<Room> getQueryWrapper(RoomQueryRequest roomQueryRequest);
+
 }

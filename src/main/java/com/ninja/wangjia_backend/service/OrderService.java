@@ -1,8 +1,11 @@
 package com.ninja.wangjia_backend.service;
 
 import com.ninja.wangjia_backend.model.dto.order.OrderCheckInRequest;
+import com.ninja.wangjia_backend.model.dto.room.RoomCheckInRequest;
 import com.ninja.wangjia_backend.model.entity.Order;
 import com.baomidou.mybatisplus.extension.service.IService;
+
+import java.util.List;
 
 /**
 * @author Administrator
@@ -12,4 +15,5 @@ import com.baomidou.mybatisplus.extension.service.IService;
 public interface OrderService extends IService<Order> {
 
     Boolean checkIn(OrderCheckInRequest orderCheckInRequest);
+    void checkRoomCheckInState(OrderCheckInRequest orderCheckInRequest);
 }

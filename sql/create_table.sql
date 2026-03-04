@@ -64,6 +64,7 @@ create table if not exists `order`
     customType      int             default 0                   not null comment '顾客类型(0散客,1团队)',
     orderInfo       varchar(1000)                               null comment '订单备注信息',
     orderState      int             default 0                   not null comment '订单状态(0未结,1已结)',
+    startTime       datetime        default CURRENT_TIMESTAMP   not null comment '入住时间',
     endTime         datetime                                    null comment '退房时间',
     createTime      datetime        default CURRENT_TIMESTAMP   not null comment '创建时间',
     updateTime      datetime        default CURRENT_TIMESTAMP   not null on update CURRENT_TIMESTAMP comment '更新时间',

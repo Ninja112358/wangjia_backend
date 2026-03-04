@@ -19,7 +19,7 @@ public class Order implements Serializable {
     /**
      * 订单id
      */
-    @TableId(type = IdType.AUTO)
+    @TableId(type = IdType.ASSIGN_ID)
     private Long id;
 
     /**
