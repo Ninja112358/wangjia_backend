@@ -9,4 +9,5 @@ public class RoomCheckInRequest implements Serializable {
     private String roomId;
     private Double roomPrice;
     private String roomType;
+    private String roomPeopleNum;
 }

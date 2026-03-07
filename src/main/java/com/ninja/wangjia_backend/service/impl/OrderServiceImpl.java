@@ -18,6 +18,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -83,6 +84,48 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order>
             //如果房间存在，但是房间已经被锁房了
             ThrowUtils.throwIf(room.getRoomState() == 5, ErrorCode.OPERATION_ERROR, "房间" + room.getRoomId() + "已锁房");
         }
+    }
+
+    @Override
+    public Boolean checkout(Long orderId) {
+        //退房逻辑
+        //获取订单信息,判断订单是否存在
+        Order order = this.getOne(new QueryWrapper<>(new Order()).eq("id", orderId));
+        ThrowUtils.throwIf(order == null, ErrorCode.PARAMS_ERROR, "订单不存在");
+        //判断订单状态是否已结
+        ThrowUtils.throwIf(order.getOrderState() == 1, ErrorCode.OPERATION_ERROR, "该订单已经退房");
+        //将订单状态改为已结,并且更新退房时间
+        order.setOrderState(1);
+        order.setEndTime(new Date());
+        ThrowUtils.throwIf(!this.updateById(order), ErrorCode.OPERATION_ERROR, "退房失败");
+        //判断该订单所在订单组的所有订单是不是全是已结状态,如果全是已结状态,那么该订单的订单组必须是已结状态
+        List<Order> orderList = this.list(new QueryWrapper<>(new Order()).eq("orderGroupId", order.getOrderGroupId()));
+        boolean flag = false;
+        for (Order item : orderList) {
+            if (item.getOrderState() == 0) {
+                flag = true;
+                break;
+            }
+        }
+        if(!flag){
+            //订单组内的所有订单是已结状态
+            OrderGroup orderGroup = orderGroupService.getById(order.getOrderGroupId());
+            orderGroup.setState(1);
+            ThrowUtils.throwIf(!orderGroupService.updateById(orderGroup), ErrorCode.OPERATION_ERROR, "订单组" + orderGroup.getId() + "状态更新失败");
+        }
+        //更改房间状态
+        //将房间状态改为空脏(3)
+        //将房间的isContact和isTeam改为false
+        //将房间的orderId改为null
+        //将房间的roomCustom改为null
+        Room room = roomService.getOne(new QueryWrapper<>(new Room()).eq("roomId", order.getRoomId()));
+        room.setRoomState(3);
+        room.setIsContact(false);
+        room.setIsTeam(false);
+        room.setOrderId(null);
+        room.setRoomCustom(null);
+        ThrowUtils.throwIf(!roomService.updateById(room), ErrorCode.OPERATION_ERROR, "房间" + room.getRoomId() + "状态更新失败");
+        return true;
     }
 
 

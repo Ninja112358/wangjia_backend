@@ -52,7 +52,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         user.setUserAccount(userAccount);
         user.setUserPassword(encryptPassword);
         user.setUserName("无名");
-        user.setUserAvatar("http://localhost:8110/api/image/logo.png");
+        user.setUserAvatar("http://123.57.57.248/api/image/logo.jpg");
         user.setUserProfile("这个人没有填简介啊~~~");
         user.setUserRole(UserRoleEnum.USER.getValue());
         boolean saveResult = this.save(user);

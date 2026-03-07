@@ -56,7 +56,8 @@ create table if not exists `order`
     cardType        varchar(20)                                 not null comment '证件类型',
     pay             decimal(10,2)   default 0                   not null comment '付款金额',
     restMoney       decimal(10,2)   default 0                   not null comment '剩余金额',
-    consume         decimal(10,2)   default 0                   not null comment '消费金额',
+    consume         decimal(10,2)   default 0                   not null comment '房间消费金额',
+    shopConsume     decimal(10,2)   default 0                   not null comment '商品消费金额',
     roomId          varchar(20)                                 not null comment '房间id',
     roomType        varchar(20)                                 not null comment '房间类型',
     roomPrice       decimal(10,2)   default 0                   not null comment '房间价格',
@@ -76,11 +77,14 @@ create table if not exists `order`
     INDEX idx_IDCard(IDCard)
 ) comment '订单信息' collate = utf8mb4_unicode_ci;
 
+drop table if exists money_info;
 create table if not exists money_info(
     id              bigint auto_increment                       comment '金额信息id' primary key,
     orderId         bigint                                      not null comment '订单id',
+    moneyType       varchar(20)                                 not null comment '营业项目(收款,扣费)',
     money           decimal(10,2)                               not null comment '金额',
     roomId          varchar(20)                                 not null comment '房间id',
+    operator        varchar(20)     default '系统'               not null comment '操作人',
     payInfo         varchar(1000)                               null comment '支付信息',
     payTime         datetime        default CURRENT_TIMESTAMP   not null comment '支付时间',
     createTime      datetime        default CURRENT_TIMESTAMP   not null comment '创建时间',

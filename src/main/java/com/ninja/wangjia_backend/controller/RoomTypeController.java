@@ -40,7 +40,7 @@ public class RoomTypeController {
         return ResultUtils.success(roomTypePage);
     }
     @PostMapping("/list")
-    @AuthCheck(mustRole = "admin")
+    @AuthCheck(mustRole = "user")
     public BaseResponse<List<RoomType>> listRoomType() {
         return ResultUtils.success(roomTypeService.list());
     }
