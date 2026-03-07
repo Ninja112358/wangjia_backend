@@ -16,4 +16,6 @@ public interface OrderService extends IService<Order> {
 
     Boolean checkIn(OrderCheckInRequest orderCheckInRequest);
     void checkRoomCheckInState(OrderCheckInRequest orderCheckInRequest);
+
+    Boolean checkout(Long orderId);
 }

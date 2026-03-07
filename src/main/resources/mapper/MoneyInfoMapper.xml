@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ninja.wangjia_backend.mapper.MoneyInfoMapper">
+
+    <resultMap id="BaseResultMap" type="com.ninja.wangjia_backend.model.entity.MoneyInfo">
+            <id property="id" column="id" />
+            <result property="orderId" column="orderId" />
+            <result property="moneyType" column="moneyType" />
+            <result property="money" column="money" />
+            <result property="roomId" column="roomId" />
+            <result property="payInfo" column="payInfo" />
+            <result property="payTime" column="payTime" />
+            <result property="createTime" column="createTime" />
+            <result property="updateTime" column="updateTime" />
+            <result property="isDelete" column="isDelete" />
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id,orderId,moneyType,money,roomId,payInfo,
+        payTime,createTime,updateTime,isDelete
+    </sql>
+</mapper>

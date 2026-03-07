@@ -116,7 +116,6 @@
                 <version>${spring-boot.version}</version>
                 <configuration>
                     <mainClass>com.ninja.wangjia_backend.BaseBackendApplication</mainClass>
-                    <skip>true</skip>
                 </configuration>
                 <executions>
                     <execution>

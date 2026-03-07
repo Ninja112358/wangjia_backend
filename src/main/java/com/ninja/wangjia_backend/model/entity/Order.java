@@ -90,6 +90,10 @@ public class Order implements Serializable {
      * 订单状态(0未结,1已结)
      */
     private Integer orderState;
+    /**
+     * 入住时间
+     */
+    private Date startTime;
 
     /**
      * 退房时间
