@@ -52,6 +52,11 @@
             <artifactId>cos_api</artifactId>
             <version>5.6.227</version>
         </dependency>
+        <!-- Quartz 核心依赖 -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-quartz</artifactId>
+        </dependency>
 
         <dependency>
             <groupId>com.mysql</groupId>

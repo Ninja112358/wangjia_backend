@@ -1,6 +1,8 @@
 package com.ninja.wangjia_backend.service;
 
+import com.baomidou.mybatisplus.core.conditions.Wrapper;
 import com.ninja.wangjia_backend.model.dto.order.OrderCheckInRequest;
+import com.ninja.wangjia_backend.model.dto.order.OrderQueryRequest;
 import com.ninja.wangjia_backend.model.dto.room.RoomCheckInRequest;
 import com.ninja.wangjia_backend.model.entity.Order;
 import com.baomidou.mybatisplus.extension.service.IService;
@@ -14,8 +16,10 @@ import java.util.List;
 */
 public interface OrderService extends IService<Order> {
 
-    Boolean checkIn(OrderCheckInRequest orderCheckInRequest);
+    Long checkIn(OrderCheckInRequest orderCheckInRequest);
     void checkRoomCheckInState(OrderCheckInRequest orderCheckInRequest);
 
     Boolean checkout(Long orderId);
+
+    Wrapper<Order> getQueryWrapper(OrderQueryRequest orderQueryRequest);
 }

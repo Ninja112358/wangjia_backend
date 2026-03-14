@@ -1,20 +1,26 @@
 package com.ninja.wangjia_backend.service.impl;
 
 import cn.hutool.core.util.ObjUtil;
+import com.baomidou.mybatisplus.core.conditions.Wrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.ninja.wangjia_backend.exception.BusinessException;
 import com.ninja.wangjia_backend.exception.ErrorCode;
 import com.ninja.wangjia_backend.exception.ThrowUtils;
+import com.ninja.wangjia_backend.model.dto.money_info.MoneyInfoFeeRequest;
 import com.ninja.wangjia_backend.model.dto.order.OrderCheckInRequest;
+import com.ninja.wangjia_backend.model.dto.order.OrderQueryRequest;
 import com.ninja.wangjia_backend.model.dto.room.RoomCheckInRequest;
 import com.ninja.wangjia_backend.model.entity.Order;
 import com.ninja.wangjia_backend.model.entity.OrderGroup;
 import com.ninja.wangjia_backend.model.entity.Room;
+import com.ninja.wangjia_backend.service.MoneyInfoService;
 import com.ninja.wangjia_backend.service.OrderGroupService;
 import com.ninja.wangjia_backend.service.OrderService;
 import com.ninja.wangjia_backend.mapper.OrderMapper;
 import com.ninja.wangjia_backend.service.RoomService;
 import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -33,26 +39,31 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order>
     private RoomService roomService;
     @Resource
     private OrderGroupService orderGroupService;
+
     @Override
-    public Boolean checkIn(OrderCheckInRequest orderCheckInRequest) {
+    public Long checkIn(OrderCheckInRequest orderCheckInRequest) {
         //检查房间状态
         checkRoomCheckInState(orderCheckInRequest);
         //检查房间完毕开始创建订单
         //1.先创建一个订单组
         OrderGroup orderGroup = orderGroupService.createOrderGroup();
+        Long orderId = null;
         for (RoomCheckInRequest roomCheckInRequest : orderCheckInRequest.getRoomList()){
             Order order = new Order();
             BeanUtils.copyProperties(orderCheckInRequest, order);
             BeanUtils.copyProperties(roomCheckInRequest, order);
             //将所有的pay只给第一个房间
-            order.setPay(roomCheckInRequest.getRoomId().equals(orderCheckInRequest.getRoomList().get(0).getRoomId())?orderCheckInRequest.getPay():0.0);
-            order.setRestMoney(order.getPay());
+            order.setPay(0.0);
+            order.setRestMoney(0.0);
             order.setOrderState(0);
             order.setOrderGroupId(orderGroup.getId());
             //保存订单
             ThrowUtils.throwIf(!this.save(order), ErrorCode.OPERATION_ERROR, order.getRoomId() + "入住失败");
             //更新房间状态
             Room room = roomService.getOne(new QueryWrapper<>(new Room()).eq("roomId", roomCheckInRequest.getRoomId()));
+            //获取第一个房间的orderId
+            if(orderId == null)
+                orderId = order.getId();
             //更新房间状态
             room.setRoomState(1);
             room.setOrderId(order.getId());
@@ -65,7 +76,8 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order>
                 room.setIsContact(true);
             ThrowUtils.throwIf(!roomService.updateById(room), ErrorCode.OPERATION_ERROR, order.getRoomId() + "房间状态更新失败");
         }
-        return true;
+
+        return orderId;
     }
 
     @Override
@@ -126,6 +138,39 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order>
         room.setRoomCustom(null);
         ThrowUtils.throwIf(!roomService.updateById(room), ErrorCode.OPERATION_ERROR, "房间" + room.getRoomId() + "状态更新失败");
         return true;
+    }
+
+
+    @Override
+    public Wrapper<Order> getQueryWrapper(OrderQueryRequest orderQueryRequest) {
+        if(orderQueryRequest == null)
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "请求参数为空");
+        Long id = orderQueryRequest.getId();
+        String name = orderQueryRequest.getName();
+        String phone = orderQueryRequest.getPhone();
+        String idCard = orderQueryRequest.getIdCard();
+        String roomId = orderQueryRequest.getRoomId();
+        String roomType = orderQueryRequest.getRoomType();
+        Long orderGroupId = orderQueryRequest.getOrderGroupId();
+        Integer customType = orderQueryRequest.getCustomType();
+        Integer orderState = orderQueryRequest.getOrderState();
+        String sortField = orderQueryRequest.getSortField();
+        String sortOrder = orderQueryRequest.getSortOrder();
+
+        QueryWrapper<Order> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq(ObjUtil.isNotNull(id), "id", id);
+        queryWrapper.like(ObjUtil.isNotNull(name), "name", name);
+        queryWrapper.like(ObjUtil.isNotNull(phone), "phone", phone);
+        queryWrapper.like(ObjUtil.isNotNull(idCard), "idCard", idCard);
+        queryWrapper.like(ObjUtil.isNotNull(roomId), "roomId", roomId);
+        queryWrapper.like(ObjUtil.isNotNull(roomType), "roomType", roomType);
+        queryWrapper.eq(ObjUtil.isNotNull(orderGroupId), "orderGroupId", orderGroupId);
+        if(customType != 2)
+            queryWrapper.like(ObjUtil.isNotNull(customType), "customType", customType);
+        if(orderState != 2)
+            queryWrapper.like(ObjUtil.isNotNull(orderState), "orderState", orderState);
+        queryWrapper.orderBy(ObjUtil.isNotNull(sortField), sortOrder.equals("ascend"), sortField);
+        return queryWrapper;
     }
 
 

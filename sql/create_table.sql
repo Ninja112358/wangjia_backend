@@ -65,6 +65,7 @@ create table if not exists `order`
     customType      int             default 0                   not null comment '顾客类型(0散客,1团队)',
     orderInfo       varchar(1000)                               null comment '订单备注信息',
     orderState      int             default 0                   not null comment '订单状态(0未结,1已结)',
+    deductState     int             default 0                   not null comment '下午两点半的时候是否该扣费的状态(0无需扣费,1需要扣费,2需要下一次调用时候扣费(也就是隔一天扣费))',
     startTime       datetime        default CURRENT_TIMESTAMP   not null comment '入住时间',
     endTime         datetime                                    null comment '退房时间',
     createTime      datetime        default CURRENT_TIMESTAMP   not null comment '创建时间',
@@ -76,6 +77,8 @@ create table if not exists `order`
     INDEX idx_phone(phone),
     INDEX idx_IDCard(IDCard)
 ) comment '订单信息' collate = utf8mb4_unicode_ci;
+# 在order表中添加一个字段deductState     int             default 0                   not null comment '下午两点半的时候是否该扣费的状态(0无需扣费,1需要扣费,2需要下一次调用时候扣费(也就是隔一天扣费))',
+
 
 drop table if exists money_info;
 create table if not exists money_info(

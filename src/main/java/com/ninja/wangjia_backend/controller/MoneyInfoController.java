@@ -28,6 +28,7 @@ public class MoneyInfoController {
     @PostMapping("/deduct")
     @AuthCheck(mustRole = "user")
     public BaseResponse<Boolean> deduct(@RequestBody MoneyInfoFeeRequest moneyInfoFeeRequest,HttpServletRequest request) {
+        System.out.println(moneyInfoFeeRequest.getOrderId());
         return ResultUtils.success(moneyInfoService.deductRoomFee(moneyInfoFeeRequest,request));
     }
     @PostMapping("/list/orderId")
