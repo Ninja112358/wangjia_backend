@@ -1,11 +1,14 @@
 package com.ninja.wangjia_backend.service.impl;
 
 import cn.hutool.core.util.ObjUtil;
+import com.baomidou.mybatisplus.core.conditions.Wrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.ninja.wangjia_backend.exception.BusinessException;
 import com.ninja.wangjia_backend.exception.ErrorCode;
 import com.ninja.wangjia_backend.exception.ThrowUtils;
 import com.ninja.wangjia_backend.model.dto.order.OrderCheckInRequest;
+import com.ninja.wangjia_backend.model.dto.order.OrderQueryRequest;
 import com.ninja.wangjia_backend.model.dto.room.RoomCheckInRequest;
 import com.ninja.wangjia_backend.model.entity.Order;
 import com.ninja.wangjia_backend.model.entity.OrderGroup;
@@ -126,6 +129,39 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order>
         room.setRoomCustom(null);
         ThrowUtils.throwIf(!roomService.updateById(room), ErrorCode.OPERATION_ERROR, "房间" + room.getRoomId() + "状态更新失败");
         return true;
+    }
+
+
+    @Override
+    public Wrapper<Order> getQueryWrapper(OrderQueryRequest orderQueryRequest) {
+        if(orderQueryRequest == null)
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "请求参数为空");
+        Long id = orderQueryRequest.getId();
+        String name = orderQueryRequest.getName();
+        String phone = orderQueryRequest.getPhone();
+        String idCard = orderQueryRequest.getIdCard();
+        String roomId = orderQueryRequest.getRoomId();
+        String roomType = orderQueryRequest.getRoomType();
+        Long orderGroupId = orderQueryRequest.getOrderGroupId();
+        Integer customType = orderQueryRequest.getCustomType();
+        Integer orderState = orderQueryRequest.getOrderState();
+        String sortField = orderQueryRequest.getSortField();
+        String sortOrder = orderQueryRequest.getSortOrder();
+
+        QueryWrapper<Order> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq(ObjUtil.isNotNull(id), "id", id);
+        queryWrapper.like(ObjUtil.isNotNull(name), "name", name);
+        queryWrapper.like(ObjUtil.isNotNull(phone), "phone", phone);
+        queryWrapper.like(ObjUtil.isNotNull(idCard), "idCard", idCard);
+        queryWrapper.like(ObjUtil.isNotNull(roomId), "roomId", roomId);
+        queryWrapper.like(ObjUtil.isNotNull(roomType), "roomType", roomType);
+        queryWrapper.eq(ObjUtil.isNotNull(orderGroupId), "orderGroupId", orderGroupId);
+        if(customType != 2)
+            queryWrapper.like(ObjUtil.isNotNull(customType), "customType", customType);
+        if(orderState != 2)
+            queryWrapper.like(ObjUtil.isNotNull(orderState), "orderState", orderState);
+        queryWrapper.orderBy(ObjUtil.isNotNull(sortField), sortOrder.equals("ascend"), sortField);
+        return queryWrapper;
     }
 
 

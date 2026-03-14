@@ -2,30 +2,29 @@ package com.ninja.wangjia_backend.controller;
 
 import cn.hutool.core.util.ObjUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.ninja.wangjia_backend.annotation.AuthCheck;
 import com.ninja.wangjia_backend.common.BaseResponse;
 import com.ninja.wangjia_backend.common.ResultUtils;
 import com.ninja.wangjia_backend.exception.ErrorCode;
 import com.ninja.wangjia_backend.exception.ThrowUtils;
-import com.ninja.wangjia_backend.model.dto.order.OrderChangeRoomPriceRequest;
-import com.ninja.wangjia_backend.model.dto.order.OrderChangeRoomRequest;
-import com.ninja.wangjia_backend.model.dto.order.OrderCheckInRequest;
+import com.ninja.wangjia_backend.model.dto.order.*;
+import com.ninja.wangjia_backend.model.dto.room.RoomQueryRequest;
 import com.ninja.wangjia_backend.model.entity.MoneyInfo;
 import com.ninja.wangjia_backend.model.entity.Order;
+import com.ninja.wangjia_backend.model.entity.OrderGroup;
 import com.ninja.wangjia_backend.model.entity.Room;
-import com.ninja.wangjia_backend.service.MoneyInfoService;
-import com.ninja.wangjia_backend.service.OrderService;
-import com.ninja.wangjia_backend.service.RoomService;
-import com.ninja.wangjia_backend.service.UserService;
+import com.ninja.wangjia_backend.model.vo.OrderGroupSelectInfoVO;
+import com.ninja.wangjia_backend.service.*;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @RestController
 @RequestMapping("/order")
@@ -36,8 +35,10 @@ public class OrderController {
     private MoneyInfoService moneyInfoService;
     @Resource
     private RoomService roomService;
-    @Autowired
+    @Resource
     private UserService userService;
+    @Autowired
+    private OrderGroupService orderGroupService;
 
     //订单入住
     @PostMapping("/checkin")
@@ -133,6 +134,80 @@ public class OrderController {
         ThrowUtils.throwIf(!orderService.updateById(order), ErrorCode.OPERATION_ERROR, "订单保存失败");
         return ResultUtils.success(true);
     }
+
+    @PostMapping("/contact")
+    @AuthCheck(mustRole = "user")
+    public BaseResponse<Boolean> contactOrder(@RequestBody OrderContactRequest orderContactRequest) {
+        ThrowUtils.throwIf(orderContactRequest == null, ErrorCode.PARAMS_ERROR);
+        Long orderGroupId = orderContactRequest.getOrderGroupId();
+        List<OrderGroupSelectInfoVO> orderGroupSelectInfoList = orderContactRequest.getOrderGroupSelectInfoList();
+        ThrowUtils.throwIf(ObjUtil.hasNull(orderGroupId,orderGroupSelectInfoList),ErrorCode.PARAMS_ERROR,"订单组id或联房信息为空");
+        //然后查询orderGroup的订单
+        Order order = orderService.getOne(new QueryWrapper<>(new Order()).eq("orderGroupId", orderGroupId),false);
+
+        ThrowUtils.throwIf(order == null,ErrorCode.PARAMS_ERROR,"订单组不存在");
+        //获取一下顾客类型:如果这些订单组中出现一个团队的，那么合起来就全都是团队类型，不然就全是联房类型
+        Integer customType = order.getCustomType();
+        boolean isTeam = customType == 1;
+        //开始联房
+        //将所有信息全部整合成一个List<Long> orderGroupIdList
+        List<Long> orderGroupIdList = new ArrayList<>();
+        orderGroupIdList.add(orderGroupId);
+        for (OrderGroupSelectInfoVO item : orderGroupSelectInfoList){
+            if(!item.getOrderList().isEmpty()){
+                isTeam = isTeam || (item.getOrderList().get(0).getCustomType() == 1);
+                orderGroupIdList.add(item.getId());
+            }
+        }
+        //这里求出了isTeam以及orderGroupIdList
+        //这里要更新一下所有的订单的顾客状态,并且还要更新所有房间的联房和团队状态
+        for(Long item : orderGroupIdList){
+            //这里根据OrderGroupId求出对应的OrderList
+            List<Room> roomList = new ArrayList<>();
+            List<Order> orderList = orderService.list(new QueryWrapper<>(new Order()).eq("orderGroupId", item));
+            for (Order orderItem:orderList){
+                orderItem.setOrderGroupId(orderGroupId);    //设置订单组id
+                orderItem.setCustomType(isTeam?1:0);        //根据isTeam去设置顾客类型
+                Room room = roomService.getOne(new QueryWrapper<>(new Room()).eq("roomId", orderItem.getRoomId()));
+                room.setIsContact(true);
+                room.setIsTeam(isTeam);
+                roomList.add(room);
+            }
+            roomService.saveOrUpdateBatch(roomList);
+            orderService.saveOrUpdateBatch(orderList);
+            if(!Objects.equals(item, orderGroupId)){
+                //最后将所有除了传入参数的orderGroup，剩下的orderGroup全部删除
+                orderGroupService.removeById(item);
+            }
+        }
+
+        return ResultUtils.success(true);
+    }
+
+    @PostMapping("/list/page")
+    @AuthCheck(mustRole = "user")
+    public BaseResponse<Page<Order>> listOrderByPage(@RequestBody OrderQueryRequest orderQueryRequest) {
+        ThrowUtils.throwIf(orderQueryRequest == null, ErrorCode.PARAMS_ERROR);
+        long current = orderQueryRequest.getCurrent();
+        long pageSize = orderQueryRequest.getPageSize();
+        Page<Order> orderPage = orderService.page(new Page<>(current, pageSize),orderService.getQueryWrapper(orderQueryRequest));
+        return ResultUtils.success(orderPage);
+    }
+
+    @PostMapping("/update")
+    @AuthCheck(mustRole = "admin")
+    public BaseResponse<Boolean> updateOrder(@RequestBody OrderUpdateRequest orderUpdateRequest) {
+        ThrowUtils.throwIf(orderUpdateRequest == null, ErrorCode.PARAMS_ERROR);
+        //判断订单id
+        Order order = orderService.getById(orderUpdateRequest.getId());
+        ThrowUtils.throwIf(order == null,ErrorCode.PARAMS_ERROR,"id不存在");
+        BeanUtils.copyProperties(orderUpdateRequest,order);
+        return ResultUtils.success(orderService.saveOrUpdate(order));
+    }
+
+
+
+
 
 
 }
