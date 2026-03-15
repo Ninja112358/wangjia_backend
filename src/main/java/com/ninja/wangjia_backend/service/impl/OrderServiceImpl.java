@@ -4,6 +4,7 @@ import cn.hutool.core.util.ObjUtil;
 import com.baomidou.mybatisplus.core.conditions.Wrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.ninja.wangjia_backend.constant.JobConstant;
 import com.ninja.wangjia_backend.exception.BusinessException;
 import com.ninja.wangjia_backend.exception.ErrorCode;
 import com.ninja.wangjia_backend.exception.ThrowUtils;
@@ -14,11 +15,16 @@ import com.ninja.wangjia_backend.model.dto.room.RoomCheckInRequest;
 import com.ninja.wangjia_backend.model.entity.Order;
 import com.ninja.wangjia_backend.model.entity.OrderGroup;
 import com.ninja.wangjia_backend.model.entity.Room;
+import com.ninja.wangjia_backend.quartz.jobs.HourDeductJob;
+import com.ninja.wangjia_backend.quartz.jobs.TestJob;
 import com.ninja.wangjia_backend.service.MoneyInfoService;
 import com.ninja.wangjia_backend.service.OrderGroupService;
 import com.ninja.wangjia_backend.service.OrderService;
 import com.ninja.wangjia_backend.mapper.OrderMapper;
 import com.ninja.wangjia_backend.service.RoomService;
+import com.ninja.wangjia_backend.utils.QuartzJobUtils;
+import lombok.extern.slf4j.Slf4j;
+import org.quartz.JobDataMap;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -33,12 +39,15 @@ import java.util.List;
 * @createDate 2026-03-03 23:40:28
 */
 @Service
+@Slf4j
 public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order>
     implements OrderService{
     @Resource
     private RoomService roomService;
     @Resource
     private OrderGroupService orderGroupService;
+    @Resource
+    private QuartzJobUtils quartzJobUtils;
 
     @Override
     public Long checkIn(OrderCheckInRequest orderCheckInRequest) {
@@ -74,6 +83,26 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order>
             //检查房间是否是多个房间,如果是那就联房
             else if(orderCheckInRequest.getRoomList().size() > 1)
                 room.setIsContact(true);
+
+
+
+            //前面都成功后这里要对订单开启定时器
+            String jobName = JobConstant.ORDER_JOB_NAME_PREFIX + order.getRoomId() + "_" + order.getId();
+            String groupName = JobConstant.ORDER_JOB_GROUP;
+            JobDataMap params = new JobDataMap();
+            params.put("orderId", order.getId());
+            // 3600 秒 = 1 小时
+            quartzJobUtils.createOneTimeDelayJob(
+                    HourDeductJob.class,
+                    jobName,
+                    groupName,
+                    3600,
+                    params
+            );
+
+
+
+
             ThrowUtils.throwIf(!roomService.updateById(room), ErrorCode.OPERATION_ERROR, order.getRoomId() + "房间状态更新失败");
         }
 

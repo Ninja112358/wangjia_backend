@@ -25,5 +25,6 @@ public interface MoneyInfoService extends IService<MoneyInfo> {
     boolean pay(MoneyInfoFeeRequest moneyInfoFeeRequest, HttpServletRequest request);
     //扣房费
     boolean deductRoomFee(MoneyInfoFeeRequest moneyInfoFeeRequest,HttpServletRequest request);
-
+    //系统扣费
+    boolean deductFeeBySystem(Long orderId, Double money, String payInfo);
 }

@@ -1,5 +1,6 @@
 create database if not exists wangjia_hotel;
 use wangjia_hotel;
+
 create table if not exists user(
    id              bigint auto_increment                       comment 'id' primary key,
    userAccount     varchar(256)                                not null comment '账号',
@@ -47,6 +48,7 @@ create table if not exists room_type(
     isDelete        tinyint         default 0                   not null comment '是否删除'
 ) comment '房间类型' collate = utf8mb4_unicode_ci;
 
+drop table if exists `order`;
 create table if not exists `order`
 (
     id              bigint auto_increment                       comment '订单id' primary key,

@@ -92,6 +92,27 @@ public class MoneyInfoServiceImpl extends ServiceImpl<MoneyInfoMapper, MoneyInfo
         return this.save(moneyInfo);
     }
 
+    @Override
+    public boolean deductFeeBySystem(Long orderId, Double money, String payInfo) {
+        ThrowUtils.throwIf(ObjUtil.hasNull(orderId, money,payInfo), ErrorCode.PARAMS_ERROR,"参数为空");
+        Order order = orderService.getById(orderId);
+        ThrowUtils.throwIf(order == null, ErrorCode.NOT_FOUND_ERROR,"订单不存在");
+        //判断订单是否已结
+        ThrowUtils.throwIf(order.getOrderState() == 1, ErrorCode.OPERATION_ERROR,"该订单已经退房,不能扣费");
+        order.setRestMoney(order.getRestMoney() - money);
+        order.setConsume(order.getConsume() + money);
+        ThrowUtils.throwIf(!orderService.updateById(order), ErrorCode.OPERATION_ERROR,"订单更新失败");
+        //更新moneyInfo
+        MoneyInfo moneyInfo = new MoneyInfo();
+        moneyInfo.setMoney(money);
+        moneyInfo.setOrderId(orderId);
+        moneyInfo.setPayInfo(payInfo);
+        moneyInfo.setRoomId(order.getRoomId());
+        moneyInfo.setOperator("System");
+        moneyInfo.setMoneyType("扣费");
+        return this.save(moneyInfo);
+    }
+
     private MoneyInfo getMoneyInfo(MoneyInfoFeeRequest moneyInfoFeeRequest, String roomId, HttpServletRequest request) {
         MoneyInfo moneyInfo = new MoneyInfo();
         BeanUtils.copyProperties(moneyInfoFeeRequest, moneyInfo);
