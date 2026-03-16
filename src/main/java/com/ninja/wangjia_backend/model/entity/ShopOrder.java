@@ -28,7 +28,7 @@ public class ShopOrder implements Serializable {
     /**
      * 商品单价
      */
-    private BigDecimal shopPrice;
+    private Double shopPrice;
 
     /**
      * 顾客类型(0:在住,1:外来)

@@ -28,7 +28,7 @@ public class Shop implements Serializable {
     /**
      * 商品价格
      */
-    private BigDecimal price;
+    private Double price;
 
     /**
      * 商品类型

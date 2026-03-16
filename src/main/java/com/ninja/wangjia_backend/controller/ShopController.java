@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Resource;
+import java.util.List;
 
 @RestController
 @RequestMapping("/shop")
@@ -44,9 +45,15 @@ public class ShopController {
     }
     @PostMapping("/list/page")
     @AuthCheck(mustRole = "admin")
-    public BaseResponse<Page<Shop>> listShop(@RequestBody ShopQueryRequest shopQueryRequest) {
+    public BaseResponse<Page<Shop>> listShopByPage(@RequestBody ShopQueryRequest shopQueryRequest) {
         ThrowUtils.throwIf(shopQueryRequest == null, ErrorCode.PARAMS_ERROR);
         return ResultUtils.success(shopService.page(new Page<>(shopQueryRequest.getCurrent(), shopQueryRequest.getPageSize()), shopService.getQueryWrapper(shopQueryRequest)));
     }
+    @PostMapping("/list")
+    @AuthCheck(mustRole = "user")
+    public BaseResponse<List<Shop>> listShop() {
+        return ResultUtils.success(shopService.list());
+    }
+
 
 }

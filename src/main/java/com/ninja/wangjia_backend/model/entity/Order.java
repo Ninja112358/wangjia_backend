@@ -85,6 +85,7 @@ public class Order implements Serializable {
      * 订单备注信息
      */
     private String orderInfo;
+    private Double shopConsume;
 
     /**
      * 订单状态(0未结,1已结)
