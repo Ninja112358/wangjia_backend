@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ninja.wangjia_backend.mapper.ShopOrderMapper">
+
+    <resultMap id="BaseResultMap" type="com.ninja.wangjia_backend.model.entity.ShopOrder">
+            <id property="id" column="id" />
+            <result property="shopName" column="shopName" />
+            <result property="shopPrice" column="shopPrice" />
+            <result property="customType" column="customType" />
+            <result property="payType" column="payType" />
+            <result property="roomId" column="roomId" />
+            <result property="shopType" column="shopType" />
+            <result property="shopNum" column="shopNum" />
+            <result property="shopInfo" column="shopInfo" />
+            <result property="createTime" column="createTime" />
+            <result property="updateTime" column="updateTime" />
+            <result property="isDelete" column="isDelete" />
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id,shopName,shopPrice,customType,payType,roomId,
+        shopType,shopNum,shopInfo,createTime,updateTime,
+        isDelete
+    </sql>
+</mapper>

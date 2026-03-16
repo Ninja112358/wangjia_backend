@@ -1,6 +1,8 @@
 package com.ninja.wangjia_backend.service;
 
+import com.baomidou.mybatisplus.core.conditions.Wrapper;
 import com.ninja.wangjia_backend.model.dto.money_info.MoneyInfoFeeRequest;
+import com.ninja.wangjia_backend.model.dto.money_info.MoneyInfoQueryRequest;
 import com.ninja.wangjia_backend.model.entity.MoneyInfo;
 import com.baomidou.mybatisplus.extension.service.IService;
 
@@ -27,4 +29,6 @@ public interface MoneyInfoService extends IService<MoneyInfo> {
     boolean deductRoomFee(MoneyInfoFeeRequest moneyInfoFeeRequest,HttpServletRequest request);
     //系统扣费
     boolean deductFeeBySystem(Long orderId, Double money, String payInfo);
+
+    Wrapper<MoneyInfo> getQueryWrapper(MoneyInfoQueryRequest moneyInfoQueryRequest);
 }

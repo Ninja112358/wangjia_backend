@@ -86,8 +86,8 @@ public class OrderController {
         moneyInfo.setOrderId(order.getId());
         moneyInfo.setRoomId(order.getRoomId());
         moneyInfo.setMoney(0.0);
-        moneyInfo.setMoneyType("修改房价为" + orderChangeRoomPriceRequest.getRoomPrice() + "元");
-        moneyInfo.setPayInfo(orderChangeRoomPriceRequest.getPayInfo());
+        moneyInfo.setMoneyType("改价");
+        moneyInfo.setPayInfo(orderChangeRoomPriceRequest.getPayInfo()+"(修改房价为" + orderChangeRoomPriceRequest.getRoomPrice() + "元)");
         moneyInfo.setOperator(userService.getLoginUser(request).getUserAccount());
         moneyInfoService.save(moneyInfo);
         order.setRoomPrice(orderChangeRoomPriceRequest.getRoomPrice());
@@ -130,8 +130,8 @@ public class OrderController {
         moneyInfo.setOrderId(order.getId());
         moneyInfo.setRoomId(order.getRoomId());
         moneyInfo.setMoney(0.0);
-        moneyInfo.setMoneyType("换房到" + orderChangeRoomRequest.getRoomId());
-        moneyInfo.setPayInfo(orderChangeRoomRequest.getPayInfo());
+        moneyInfo.setMoneyType("换房");
+        moneyInfo.setPayInfo(orderChangeRoomRequest.getPayInfo() + "(换房到" + orderChangeRoomRequest.getRoomId() + ",房价:" + orderChangeRoomRequest.getRoomPrice() + ")");
         moneyInfo.setOperator(userService.getLoginUser(request).getUserAccount());
         ThrowUtils.throwIf(!moneyInfoService.save(moneyInfo), ErrorCode.OPERATION_ERROR, "订单保存失败");
 

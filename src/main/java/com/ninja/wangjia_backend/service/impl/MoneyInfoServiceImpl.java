@@ -1,11 +1,15 @@
 package com.ninja.wangjia_backend.service.impl;
 
 import cn.hutool.core.util.ObjUtil;
+import cn.hutool.core.util.StrUtil;
+import com.baomidou.mybatisplus.core.conditions.Wrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.ninja.wangjia_backend.exception.BusinessException;
 import com.ninja.wangjia_backend.exception.ErrorCode;
 import com.ninja.wangjia_backend.exception.ThrowUtils;
 import com.ninja.wangjia_backend.model.dto.money_info.MoneyInfoFeeRequest;
+import com.ninja.wangjia_backend.model.dto.money_info.MoneyInfoQueryRequest;
 import com.ninja.wangjia_backend.model.entity.MoneyInfo;
 import com.ninja.wangjia_backend.model.entity.Order;
 import com.ninja.wangjia_backend.service.MoneyInfoService;
@@ -111,6 +115,33 @@ public class MoneyInfoServiceImpl extends ServiceImpl<MoneyInfoMapper, MoneyInfo
         moneyInfo.setOperator("System");
         moneyInfo.setMoneyType("扣费");
         return this.save(moneyInfo);
+    }
+
+    @Override
+    public Wrapper<MoneyInfo> getQueryWrapper(MoneyInfoQueryRequest moneyInfoQueryRequest) {
+        if(moneyInfoQueryRequest == null)
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "请求参数为空");
+        Long id = moneyInfoQueryRequest.getId();
+        Long orderId = moneyInfoQueryRequest.getOrderId();
+        String moneyType = moneyInfoQueryRequest.getMoneyType();
+        String roomId = moneyInfoQueryRequest.getRoomId();
+        String operator = moneyInfoQueryRequest.getOperator();
+        String payInfo = moneyInfoQueryRequest.getPayInfo();
+        String sortField = moneyInfoQueryRequest.getSortField();
+        String sortOrder = moneyInfoQueryRequest.getSortOrder();
+
+
+        QueryWrapper<MoneyInfo> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq(ObjUtil.isNotNull(id), "id", id);
+        queryWrapper.like(ObjUtil.isNotNull(orderId), "orderId", orderId);
+        if (StrUtil.isNotBlank(moneyType) && !moneyType.equals("all")){
+            queryWrapper.like(StrUtil.isNotBlank(moneyType), "moneyType", moneyType);
+        }
+        queryWrapper.like(StrUtil.isNotBlank(roomId), "roomId", roomId);
+        queryWrapper.like(StrUtil.isNotBlank(operator), "operator", operator);
+        queryWrapper.like(StrUtil.isNotBlank(payInfo), "payInfo", payInfo);
+        queryWrapper.orderBy(ObjUtil.isNotNull(sortField), sortOrder.equals("ascend"), sortField);
+        return queryWrapper;
     }
 
     private MoneyInfo getMoneyInfo(MoneyInfoFeeRequest moneyInfoFeeRequest, String roomId, HttpServletRequest request) {

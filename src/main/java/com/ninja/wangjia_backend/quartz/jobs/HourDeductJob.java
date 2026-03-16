@@ -18,7 +18,6 @@ import org.springframework.stereotype.Component;
 import javax.annotation.Resource;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.List;
 
 @DisallowConcurrentExecution    // 禁止并发执行
 @Component

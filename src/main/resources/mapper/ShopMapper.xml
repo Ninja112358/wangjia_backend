@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ninja.wangjia_backend.mapper.ShopMapper">
+
+    <resultMap id="BaseResultMap" type="com.ninja.wangjia_backend.model.entity.Shop">
+            <id property="id" column="id" />
+            <result property="name" column="name" />
+            <result property="price" column="price" />
+            <result property="type" column="type" />
+            <result property="num" column="num" />
+            <result property="info" column="info" />
+            <result property="createTime" column="createTime" />
+            <result property="updateTime" column="updateTime" />
+            <result property="isDelete" column="isDelete" />
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id,name,price,type,num,info,
+        createTime,updateTime,isDelete
+    </sql>
+</mapper>
