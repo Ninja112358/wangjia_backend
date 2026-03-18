@@ -12,10 +12,7 @@ import com.ninja.wangjia_backend.model.dto.shop.ShopQueryRequest;
 import com.ninja.wangjia_backend.model.dto.shop.ShopUpdateRequest;
 import com.ninja.wangjia_backend.model.entity.Shop;
 import com.ninja.wangjia_backend.service.ShopService;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import java.util.List;
@@ -44,7 +41,7 @@ public class ShopController {
         return ResultUtils.success(shopService.removeById(deleteRequest.getId()));
     }
     @PostMapping("/list/page")
-    @AuthCheck(mustRole = "admin")
+    @AuthCheck(mustRole = "user")
     public BaseResponse<Page<Shop>> listShopByPage(@RequestBody ShopQueryRequest shopQueryRequest) {
         ThrowUtils.throwIf(shopQueryRequest == null, ErrorCode.PARAMS_ERROR);
         return ResultUtils.success(shopService.page(new Page<>(shopQueryRequest.getCurrent(), shopQueryRequest.getPageSize()), shopService.getQueryWrapper(shopQueryRequest)));
@@ -54,6 +51,14 @@ public class ShopController {
     public BaseResponse<List<Shop>> listShop() {
         return ResultUtils.success(shopService.list());
     }
-
+    @GetMapping("/increase/shopNum")
+    @AuthCheck(mustRole = "user")
+    public BaseResponse<Boolean> increaseShopNum(Long shopId, Integer num) {
+        Shop shop = shopService.getById(shopId);
+        ThrowUtils.throwIf(shop == null, ErrorCode.NOT_FOUND_ERROR, "商品不存在");
+        ThrowUtils.throwIf(num < 0, ErrorCode.OPERATION_ERROR, "入库数量不能小于0");
+        shop.setNum(shop.getNum() + num);
+        return ResultUtils.success(shopService.updateById(shop));
+    }
 
 }

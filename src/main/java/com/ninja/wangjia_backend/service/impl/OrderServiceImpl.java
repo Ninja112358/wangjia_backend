@@ -202,6 +202,37 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order>
         return queryWrapper;
     }
 
+    @Override
+    public Boolean checkoutCancel(Long orderId) {
+        Order order = this.getOne(new QueryWrapper<>(new Order()).eq("id", orderId));
+        ThrowUtils.throwIf(order == null, ErrorCode.PARAMS_ERROR, "订单不存在");
+        ThrowUtils.throwIf(order.getOrderState() != 1, ErrorCode.OPERATION_ERROR, "该订单未退房");
+        //判断撤销退房的时间是否是退房时间的十分钟内
+        long one_minute = 60 * 1000;
+        ThrowUtils.throwIf(new Date().getTime() - order.getEndTime().getTime() > 10*one_minute, ErrorCode.OPERATION_ERROR, "撤销退房时间超过10分钟");
+        //取消退房:
+        // 判断房间是否有是在住状态,如果不是则更新房间状态为在住并且填充用户信息
+        // 设置订单状态为未结
+        // 设置订单组状态为0
+        Room room = roomService.getOne(new QueryWrapper<>(new Room()).eq("roomId", order.getRoomId()));
+        ThrowUtils.throwIf(room.getRoomState() == 1 || room.getRoomState() == 4, ErrorCode.OPERATION_ERROR, "房间" + room.getRoomId() + "状态不支持取消退房");
+
+        order.setOrderState(0);
+        ThrowUtils.throwIf(!this.updateById(order), ErrorCode.OPERATION_ERROR, "订单" + order.getId() + "状态更新失败");
+        OrderGroup orderGroup = orderGroupService.getById(order.getOrderGroupId());
+        orderGroup.setState(0);
+        ThrowUtils.throwIf(!orderGroupService.updateById(orderGroup), ErrorCode.OPERATION_ERROR, "订单组" + orderGroup.getId() + "状态更新失败");
+
+        room.setRoomState(1);
+        room.setOrderId(orderId);
+        room.setRoomCustom(order.getName());
+        long count = this.count(new QueryWrapper<>(new Order()).eq("orderGroupId", order.getOrderGroupId()));
+        room.setIsContact(count > 1);
+        room.setIsTeam(order.getCustomType() == 1);
+        ThrowUtils.throwIf(!roomService.updateById(room), ErrorCode.OPERATION_ERROR, "房间" + room.getRoomId() + "状态更新失败");
+        return true;
+    }
+
 
 }
 

@@ -7,9 +7,7 @@ import com.ninja.wangjia_backend.model.entity.MoneyInfo;
 import com.baomidou.mybatisplus.extension.service.IService;
 
 import javax.servlet.http.HttpServletRequest;
-import java.util.Date;
 import java.util.List;
-import java.util.Map;
 
 /**
 * @author Administrator
@@ -28,7 +26,7 @@ public interface MoneyInfoService extends IService<MoneyInfo> {
     //扣房费
     boolean deductRoomFee(MoneyInfoFeeRequest moneyInfoFeeRequest,HttpServletRequest request);
     //系统扣费
-    boolean deductFeeBySystem(Long orderId, Double money, String payInfo);
+    void deductFeeBySystem(Long orderId, Double money, String payInfo);
 
     Wrapper<MoneyInfo> getQueryWrapper(MoneyInfoQueryRequest moneyInfoQueryRequest);
 }

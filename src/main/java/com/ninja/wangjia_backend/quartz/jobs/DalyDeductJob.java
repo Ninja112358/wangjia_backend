@@ -40,6 +40,7 @@ public class DalyDeductJob extends QuartzJobBean {
                 System.out.println("房间" + order.getRoomId() + "的订单已扣费");
             }
             else if(order.getDeductState() > 1){
+                order = orderService.getById(order.getId());
                 order.setDeductState(order.getDeductState() - 1);
                 orderService.updateById(order);
                 System.out.println("房间" + order.getRoomId() + "的订单下一次会扣费");

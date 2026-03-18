@@ -1,17 +1,16 @@
 package com.ninja.wangjia_backend.quartz.jobs;
 
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.ninja.wangjia_backend.exception.ErrorCode;
 import com.ninja.wangjia_backend.exception.ThrowUtils;
 import com.ninja.wangjia_backend.model.entity.Order;
 import com.ninja.wangjia_backend.service.MoneyInfoService;
-import com.ninja.wangjia_backend.service.OrderGroupService;
 import com.ninja.wangjia_backend.service.OrderService;
 import lombok.Data;
+import lombok.NonNull;
 import org.quartz.DisallowConcurrentExecution;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
-import org.quartz.PersistJobDataAfterExecution;
+import org.quartz.SchedulerException;
 import org.springframework.scheduling.quartz.QuartzJobBean;
 import org.springframework.stereotype.Component;
 
@@ -31,12 +30,13 @@ public class HourDeductJob extends QuartzJobBean {
     private OrderService orderService;
 
     @Override
-    protected void executeInternal(JobExecutionContext context) throws JobExecutionException {
+    protected void executeInternal(@NonNull JobExecutionContext context) throws JobExecutionException {
         System.out.println("订单" + orderId + "的一小时后扣费任务执行时间：" + new Date());
         //获取订单
         Order order = orderService.getById(orderId);
         ThrowUtils.throwIf(order == null, ErrorCode.PARAMS_ERROR, "订单不存在");
         ThrowUtils.throwIf(order.getOrderState() == 1, ErrorCode.OPERATION_ERROR, "订单状态为已结");
+        //ThrowUtils.throwIf(order.getDeductState() > 0,ErrorCode.OPERATION_ERROR,"该订单已经扣过费了");
         moneyInfoService.deductFeeBySystem(order.getId(),order.getRoomPrice(),"一个小时后扣费");
         //扣费后需要更新deductState
         //在第一次扣费的时候更新这个deduct_state
@@ -58,8 +58,15 @@ public class HourDeductJob extends QuartzJobBean {
             } else {
                 deductState = 1;
             }
+            order = orderService.getById(orderId);
             order.setDeductState(deductState);
             orderService.updateById(order);
+        }
+        //最后把当前的定时器删除
+        try {
+            context.getScheduler().deleteJob(context.getJobDetail().getKey());
+        } catch (SchedulerException e) {
+            throw new RuntimeException(e);
         }
     }
 }

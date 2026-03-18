@@ -23,10 +23,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 @RestController
 @RequestMapping("/order")
@@ -58,6 +55,12 @@ public class OrderController {
     @AuthCheck(mustRole = "user")
     public BaseResponse<Boolean> checkout(Long orderId) {
         return ResultUtils.success(orderService.checkout(orderId));
+    }
+    //订单取消退房
+    @PostMapping("/checkout/cancel")
+    @AuthCheck(mustRole = "user")
+    public BaseResponse<Boolean> checkoutCancel(Long orderId) {
+        return ResultUtils.success(orderService.checkoutCancel(orderId));
     }
     //根据订单id查询订单组的所有订单
     @PostMapping("/list/orderGroupData")
@@ -92,6 +95,21 @@ public class OrderController {
         moneyInfoService.save(moneyInfo);
         order.setRoomPrice(orderChangeRoomPriceRequest.getRoomPrice());
         return ResultUtils.success(orderService.updateById(order));
+    }
+    @PostMapping("/search")
+    @AuthCheck(mustRole = "user")
+    BaseResponse<List<Order>> searchOrder(String input){
+        ThrowUtils.throwIf(input == null, ErrorCode.PARAMS_ERROR,"参数为空");
+        if(input.isEmpty())
+            return ResultUtils.success(new ArrayList<>());
+        List<Order> orderList = orderService.list(new QueryWrapper<>(new Order()).like("name",input));
+        //根据姓名,电话,身份证号进行去重
+        List<Order> ans = new ArrayList<>();
+        Set<String> orderSet = new HashSet<>();
+        for(Order order : orderList)
+            if(orderSet.add(order.getName() + order.getPhone() + order.getIdCard()))
+                ans.add(order);
+        return ResultUtils.success(ans);
     }
     //换房
     @PostMapping("/room/change")
@@ -212,6 +230,18 @@ public class OrderController {
         ThrowUtils.throwIf(order == null,ErrorCode.PARAMS_ERROR,"id不存在");
         BeanUtils.copyProperties(orderUpdateRequest,order);
         return ResultUtils.success(orderService.saveOrUpdate(order));
+    }
+    @GetMapping("/state/remind")
+    @AuthCheck(mustRole = "user")
+    public BaseResponse<Boolean> findOrderRemindState(Long orderId) {
+        Order order = orderService.getById(orderId);
+        if (order == null)
+            return ResultUtils.success(false);
+        List<Order> orderList = orderService.list(new QueryWrapper<>(new Order()).eq("orderGroupId", order.getOrderGroupId()));
+        double sum = 0.0;
+        for (Order item : orderList)
+            sum += item.getRestMoney();
+        return ResultUtils.success(sum < 0);
     }
 
 

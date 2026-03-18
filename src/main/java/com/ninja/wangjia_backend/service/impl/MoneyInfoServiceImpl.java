@@ -18,6 +18,7 @@ import com.ninja.wangjia_backend.service.OrderService;
 import com.ninja.wangjia_backend.service.UserService;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
@@ -97,15 +98,19 @@ public class MoneyInfoServiceImpl extends ServiceImpl<MoneyInfoMapper, MoneyInfo
     }
 
     @Override
-    public boolean deductFeeBySystem(Long orderId, Double money, String payInfo) {
+    public void deductFeeBySystem(Long orderId, Double money, String payInfo) {
         ThrowUtils.throwIf(ObjUtil.hasNull(orderId, money,payInfo), ErrorCode.PARAMS_ERROR,"参数为空");
         Order order = orderService.getById(orderId);
         ThrowUtils.throwIf(order == null, ErrorCode.NOT_FOUND_ERROR,"订单不存在");
         //判断订单是否已结
         ThrowUtils.throwIf(order.getOrderState() == 1, ErrorCode.OPERATION_ERROR,"该订单已经退房,不能扣费");
+        System.out.println(order);
         order.setRestMoney(order.getRestMoney() - money);
         order.setConsume(order.getConsume() + money);
+        System.out.println(order);
         ThrowUtils.throwIf(!orderService.updateById(order), ErrorCode.OPERATION_ERROR,"订单更新失败");
+        Order test = orderService.getById(orderId);
+        System.out.println(test);
         //更新moneyInfo
         MoneyInfo moneyInfo = new MoneyInfo();
         moneyInfo.setMoney(money);
@@ -114,7 +119,7 @@ public class MoneyInfoServiceImpl extends ServiceImpl<MoneyInfoMapper, MoneyInfo
         moneyInfo.setRoomId(order.getRoomId());
         moneyInfo.setOperator("System");
         moneyInfo.setMoneyType("扣费");
-        return this.save(moneyInfo);
+        this.save(moneyInfo);
     }
 
     @Override

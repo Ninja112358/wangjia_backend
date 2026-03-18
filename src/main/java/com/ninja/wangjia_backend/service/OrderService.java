@@ -22,4 +22,6 @@ public interface OrderService extends IService<Order> {
     Boolean checkout(Long orderId);
 
     Wrapper<Order> getQueryWrapper(OrderQueryRequest orderQueryRequest);
+
+    Boolean checkoutCancel(Long orderId);
 }
