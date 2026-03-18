@@ -7,6 +7,7 @@ import com.ninja.wangjia_backend.model.dto.room.RoomCheckInRequest;
 import com.ninja.wangjia_backend.model.entity.Order;
 import com.baomidou.mybatisplus.extension.service.IService;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 
 /**
@@ -23,5 +24,5 @@ public interface OrderService extends IService<Order> {
 
     Wrapper<Order> getQueryWrapper(OrderQueryRequest orderQueryRequest);
 
-    Boolean checkoutCancel(Long orderId);
+    Boolean checkoutCancel(Long orderId, HttpServletRequest request);
 }

@@ -17,11 +17,8 @@ import com.ninja.wangjia_backend.model.entity.OrderGroup;
 import com.ninja.wangjia_backend.model.entity.Room;
 import com.ninja.wangjia_backend.quartz.jobs.HourDeductJob;
 import com.ninja.wangjia_backend.quartz.jobs.TestJob;
-import com.ninja.wangjia_backend.service.MoneyInfoService;
-import com.ninja.wangjia_backend.service.OrderGroupService;
-import com.ninja.wangjia_backend.service.OrderService;
+import com.ninja.wangjia_backend.service.*;
 import com.ninja.wangjia_backend.mapper.OrderMapper;
-import com.ninja.wangjia_backend.service.RoomService;
 import com.ninja.wangjia_backend.utils.QuartzJobUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.quartz.JobDataMap;
@@ -30,6 +27,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
 import java.util.Date;
 import java.util.List;
 
@@ -48,6 +46,8 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order>
     private OrderGroupService orderGroupService;
     @Resource
     private QuartzJobUtils quartzJobUtils;
+    @Autowired
+    private UserService userService;
 
     @Override
     public Long checkIn(OrderCheckInRequest orderCheckInRequest) {
@@ -203,13 +203,16 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order>
     }
 
     @Override
-    public Boolean checkoutCancel(Long orderId) {
+    public Boolean checkoutCancel(Long orderId, HttpServletRequest request) {
         Order order = this.getOne(new QueryWrapper<>(new Order()).eq("id", orderId));
         ThrowUtils.throwIf(order == null, ErrorCode.PARAMS_ERROR, "订单不存在");
         ThrowUtils.throwIf(order.getOrderState() != 1, ErrorCode.OPERATION_ERROR, "该订单未退房");
         //判断撤销退房的时间是否是退房时间的十分钟内
         long one_minute = 60 * 1000;
-        ThrowUtils.throwIf(new Date().getTime() - order.getEndTime().getTime() > 10*one_minute, ErrorCode.OPERATION_ERROR, "撤销退房时间超过10分钟");
+        long one_hour = 60 * one_minute;
+        if(!userService.getLoginUser(request).getUserRole().equals("admin"))
+            ThrowUtils.throwIf(new Date().getTime() - order.getEndTime().getTime() > 24 * one_hour, ErrorCode.OPERATION_ERROR, "撤销退房时间超过1天");
+
         //取消退房:
         // 判断房间是否有是在住状态,如果不是则更新房间状态为在住并且填充用户信息
         // 设置订单状态为未结

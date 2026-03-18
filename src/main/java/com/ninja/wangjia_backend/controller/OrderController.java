@@ -59,8 +59,8 @@ public class OrderController {
     //订单取消退房
     @PostMapping("/checkout/cancel")
     @AuthCheck(mustRole = "user")
-    public BaseResponse<Boolean> checkoutCancel(Long orderId) {
-        return ResultUtils.success(orderService.checkoutCancel(orderId));
+    public BaseResponse<Boolean> checkoutCancel(Long orderId,HttpServletRequest request) {
+        return ResultUtils.success(orderService.checkoutCancel(orderId,request));
     }
     //根据订单id查询订单组的所有订单
     @PostMapping("/list/orderGroupData")
