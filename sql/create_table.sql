@@ -1,5 +1,5 @@
-create database if not exists wangjia_hotel;
-use wangjia_hotel;
+create database if not exists wangjia_hotel_mirror;
+use wangjia_hotel_mirror;
 
 create table if not exists user(
    id              bigint auto_increment                       comment 'id' primary key,
@@ -48,7 +48,6 @@ create table if not exists room_type(
     isDelete        tinyint         default 0                   not null comment '是否删除'
 ) comment '房间类型' collate = utf8mb4_unicode_ci;
 
-drop table if exists `order`;
 create table if not exists `order`
 (
     id              bigint auto_increment                       comment '订单id' primary key,
@@ -82,7 +81,6 @@ create table if not exists `order`
 # 在order表中添加一个字段deductState     int             default 0                   not null comment '下午两点半的时候是否该扣费的状态(0无需扣费,1需要扣费,2需要下一次调用时候扣费(也就是隔一天扣费))',
 
 
-drop table if exists money_info;
 create table if not exists money_info(
     id              bigint auto_increment                       comment '金额信息id' primary key,
     orderId         bigint                                      not null comment '订单id',
@@ -135,3 +133,11 @@ create table if not exists shop_order(
     INDEX idx_roomId(roomId),
     INDEX idx_shopName(shopName)
 ) comment '商品订单信息' collate = utf8mb4_unicode_ci;
+
+create table if not exists fingerprint(
+    id              bigint auto_increment                       comment '指纹id' primary key,
+    fingerprint     varchar(2000)                               not null comment '指纹信息',
+    createTime      datetime        default CURRENT_TIMESTAMP   not null comment '创建时间',
+    updateTime      datetime        default CURRENT_TIMESTAMP   not null on update CURRENT_TIMESTAMP comment '更新时间',
+    isDelete        tinyint         default 0                   not null comment '是否删除'
+) comment '浏览器指纹信息' collate = utf8mb4_unicode_ci;
