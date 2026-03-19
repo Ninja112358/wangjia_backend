@@ -135,3 +135,11 @@ create table if not exists shop_order(
     INDEX idx_roomId(roomId),
     INDEX idx_shopName(shopName)
 ) comment '商品订单信息' collate = utf8mb4_unicode_ci;
+
+create table if not exists fingerprint(
+    id              bigint auto_increment                       comment '指纹id' primary key,
+    fingerprint     varchar(2000)                               unique not null comment '指纹信息',
+    createTime      datetime        default CURRENT_TIMESTAMP   not null comment '创建时间',
+    updateTime      datetime        default CURRENT_TIMESTAMP   not null on update CURRENT_TIMESTAMP comment '更新时间',
+    isDelete        tinyint         default 0                   not null comment '是否删除'
+) comment '浏览器指纹信息' collate = utf8mb4_unicode_ci;
