@@ -10,7 +10,9 @@
 - **ORM 框架**: MyBatis-Plus 3.5.9  
 - **数据库**: MySQL + Redis
 - **接口文档**: Knife4j
-- **对象存储**: 腾讯云 COS
+- **对象存储**: 本地文件系统（原腾讯云 COS 已禁用）
+- **日志记录**: Log4j2
+- **分库分表**: Sha
 - **定时任务**: Quartz
 
 ## 快速启动
@@ -129,10 +131,6 @@ public BaseResponse delete(...) {
     // ...
 }
 ```
-
-### 对象存储
-
-文件上传已集成腾讯云 COS，使用 `CosManager` 工具类即可。
 
 ## 部署
 
